@@ -39,23 +39,18 @@ void rpi_aux_mu_init() {
     /* Enable aux uart */
     RPI_AUX->ENABLES = RPI_AUX_MU_ENABLE;
 
-    /* Clear interrupts */
     RPI_AUX->MU_IER = 0;
 
     /* Disable flow control */
     RPI_AUX->MU_CNTL = 0;
 
-    /* Set the line data format (8 bit mode) */
     RPI_AUX->MU_LCR = RPI_AUX_MU_LCR_8BIT_MODE;
 
-    /* Set UART1_RTS line to low */
     RPI_AUX->MU_MCR = 0;
 
     /* Diable all interrupts from mu and clear the fifos */
     RPI_AUX->MU_IER = 0;
-
-    /* MSB baudrate and enable receive interrupt */
-    RPI_AUX->MU_IIR = 0xC6;
+    RPI_AUX->MU_IIR = 0xC6; // ??
 
     //#define bits 8
     //RPI_AUX->MU_BAUD = ( _RPI_SYS_FREQ / ( 8 * bits )) - 1;
@@ -63,7 +58,7 @@ void rpi_aux_mu_init() {
 
     /* Setup GPIO 14 and 15 as alternative function 5 which is
      UART 1 TXD/RXD. These need to be set before enabling the UART */
-    reg_val = GET32(_GPIO_FSEL1);
+    reg_val =GET32(_GPIO_FSEL1);
     reg_val &= ~(7 << 12); // GPIO 14
     reg_val |= 2 << 12;      // ALT5
     reg_val &= ~(7 << 15); // GPIO 15
