@@ -113,3 +113,7 @@ uint32_t rpi_aux_getc(void) {
 
     return (RPI_AUX->MU_IO & 0xFF);
 }
+
+void __putc(int c, void *stream) {
+	rpi_aux_mu_putc(c);
+}
