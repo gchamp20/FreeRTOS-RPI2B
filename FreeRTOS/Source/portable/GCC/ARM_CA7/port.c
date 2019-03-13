@@ -345,17 +345,17 @@ uint32_t ulInterruptStatus;
 }
 /*-----------------------------------------------------------*/
 
-void vPortTaskUsesFPU( void )
-{
-uint32_t ulInitialFPSCR = 0;
+//void vPortTaskUsesFPU( void )
+//{
+//uint32_t ulInitialFPSCR = 0;
 
 	/* A task is registering the fact that it needs an FPU context.  Set the
 	FPU flag (which is saved as part of the task context). */
-	ulPortTaskHasFPUContext = pdTRUE;
+//	ulPortTaskHasFPUContext = pdTRUE;
 
 	/* Initialise the floating point status register. */
-	__asm volatile ( "FMXR 	FPSCR, %0" :: "r" (ulInitialFPSCR) );
-}
+//	__asm volatile ( "FMXR 	FPSCR, %0" :: "r" (ulInitialFPSCR) );
+//}
 /*-----------------------------------------------------------*/
 
 
