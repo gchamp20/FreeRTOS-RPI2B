@@ -43,10 +43,6 @@ not_zero:
 	wfe
 	b       not_zero
 zero:// cpu id == 0
-
-	/* Disable IRQ & FIQ */
-	cpsid if
-
 	mov r0, #0x1
 	mcr p15, 0, r0, c9, c14, 0 /* allow PMU from user space */
 
@@ -80,16 +76,16 @@ overHyped: /* Get out of HYP mode */
 continueBoot:
 	;@	In the reset handler, we need to copy our interrupt vector table to 0x0000, its currently at 0x8000
 
-	// R0 = System Control Register
-	mrc p15,0,r0,c1,c0,0
+	// R0 = Auxiliary System Control Register
+	mrc p15,0,r0,c1,c0,1
+	orr r0, #0x40
+	mcr p15,0,r0,c1,c0,1
+	mrc p15,0,r0,c1,c0,1
+	cmp r0, #0
+	beq not_zero
 
-	// Enable caches and branch prediction
-	orr r0, #0x800
-	orr r0, #0x4
-	orr r0, #0x1000
-
-	// System Control Register = R0
-	mcr p15,0,r0,c1,c0,0
+	mrc p15, 0, r1, c12, c0, 0              // get VBAR
+	mov r0, #0x8000                         // the address of our 8 handlers
 
 	mov r0,#0x8000								;@ Store the source pointer
     mov r1,#0x0000								;@ Store the destination pointer.
@@ -102,6 +98,22 @@ continueBoot:
     ldmia r0!,{r2,r3,r4,r5,r6,r7,r8,r9}			;@ Load from 4*n of regs (8) as R0 is now incremented.
     stmia r1!,{r2,r3,r4,r5,r6,r7,r8,r9}			;@ Store this extra set of data.
 
+	mov r12,#0
+	mcr p15, 0, r12, c7, c10, 1   // DCCMVAC - Clean data or unified cache line by virtual address to PoC.
+	dsb                           // Data sync barrier
+	mov r12, #0
+	mcr p15, 0, r12, c7, c5, 0    // ICIALLU - Invalidate all instruction caches to PoU. If branch predictors are architecturally visible, also flush them.
+	mov r12, #0
+	mcr p15, 0, r12, c7, c5, 6    // BPIALL  - Invalidate all entries from branch predictors.
+	dsb                           // Data sync barrier
+	isb                           // Instruction sync barrier
+
+	mrc p15,0,r2,c1,c0,0
+	orr r2, #0x1000    // Instruction cache
+	//orr r2, #0x0800    // Branch prediction (does not affect this result)
+	//orr r2, #0x0004    // Data cache        (does not affect this result)
+	//orr r2, #0x0001  // MMU               (does not work! don't know why yet)
+	mcr p15,0,r2,c1,c0,0
 
 	;@	Set up the various STACK pointers for different CPU modes
     ;@ (PSR_IRQ_MODE|PSR_FIQ_DIS|PSR_IRQ_DIS)
@@ -131,8 +143,8 @@ zero_loop:
 	blt		zero_loop
 
 	bl 		rpi_cpu_irq_disable
-	
-	
+
+
 	;@ 	mov	sp,#0x1000000
 	b main									;@ We're ready?? Lets start main execution!
 	.section .text
