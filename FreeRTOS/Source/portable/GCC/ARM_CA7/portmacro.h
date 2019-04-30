@@ -146,8 +146,35 @@ extern void vPortInstallFreeRTOSVectorTable( void );
 
 /* In the absence of a priority mask register, these functions and macros
 globally enable and disable interrupts. */
+#define portNO_CRITICAL_NESTING			( ( uint32_t ) 0 )
+extern volatile uint32_t ulCriticalNesting;
 #define portENTER_CRITICAL()		vPortEnterCritical();
+/*#define portENTER_CRITICAL()		\
+									do {                 \
+										portDISABLE_INTERRUPTS(); \
+										ulCriticalNesting++; \
+										if( ulCriticalNesting == 1 ) \
+										{ \
+											configASSERT( ulPortInterruptNesting == 0 ); \
+										} \
+									} while(0) \
+*/
+
 #define portEXIT_CRITICAL()			vPortExitCritical();
+
+/*#define portEXIT_CRITICAL() \
+									do {                 \
+										if( ulCriticalNesting > portNO_CRITICAL_NESTING ) \
+										{ \
+											ulCriticalNesting--; \
+											if( ulCriticalNesting == portNO_CRITICAL_NESTING ) \
+											{ \
+												portENABLE_INTERRUPTS(); \
+											} \
+										} \
+									} while(0) \
+*/
+
 #define portENABLE_INTERRUPTS()		__asm volatile ( "CPSIE i 	\n"	);
 #define portDISABLE_INTERRUPTS()	__asm volatile ( "CPSID i 	\n"		\
 													 "DSB		\n"		\

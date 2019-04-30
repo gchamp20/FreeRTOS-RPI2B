@@ -77,11 +77,11 @@ continueBoot:
 	;@	In the reset handler, we need to copy our interrupt vector table to 0x0000, its currently at 0x8000
 
 	// R0 = Auxiliary System Control Register
-	mrc p15,0,r0,c1,c0,1
+	/*mrc p15,0,r0,c1,c0,1
 	orr r0, #0x40
 	mcr p15,0,r0,c1,c0,1
 	mrc p15,0,r0,c1,c0,1
-	cmp r0, #0
+	cmp r0, #0 */
 	beq not_zero
 
 	mrc p15, 0, r1, c12, c0, 0              // get VBAR

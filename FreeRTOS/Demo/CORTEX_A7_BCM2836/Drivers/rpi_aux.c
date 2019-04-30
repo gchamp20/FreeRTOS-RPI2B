@@ -78,6 +78,17 @@ void rpi_aux_mu_init() {
     RPI_AUX->MU_CNTL = RPI_AUX_MU_CNTL_TX_ENABLE | RPI_AUX_MU_CNTL_RX_ENABLE;
 }
 
+void rpi_aux_mu_raw_putc(uint32_t c) {
+    while(1)
+    {
+        if(RPI_AUX->MU_LSR & RPI_AUX_MU_LSR_TX_EMPTY) {
+            break;
+        }
+    }
+
+    RPI_AUX->MU_IO = c;
+}
+
 void rpi_aux_mu_putc(uint32_t c) {
 
     if(c == 0x0A) {

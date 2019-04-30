@@ -327,11 +327,15 @@ void vPortExitCritical( void )
 }
 /*-----------------------------------------------------------*/
 
+//static int32_t LED_STATUS = 0;
 void FreeRTOS_Tick_Handler( void )
 {
 uint32_t ulInterruptStatus;
 
 	ulInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+
+	//rpi_gpio_set_val(21, LED_STATUS);
+	//LED_STATUS = LED_STATUS ^ 0x01;
 
 	/* Increment the RTOS tick. */
 	if( xTaskIncrementTick() != pdFALSE )
@@ -353,8 +357,6 @@ uint32_t ulInitialFPSCR = 0;
 	FPU flag (which is saved as part of the task context). */
 	ulPortTaskHasFPUContext = pdTRUE;
 
-	/* Initialise the floating point status register. */
-	__asm volatile ( "FMXR 	FPSCR, %0" :: "r" (ulInitialFPSCR) );
 }
 /*-----------------------------------------------------------*/
 

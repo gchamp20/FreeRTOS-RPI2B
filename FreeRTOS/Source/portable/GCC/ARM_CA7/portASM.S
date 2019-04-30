@@ -95,12 +95,12 @@
 	CMP		R3, #0
 
 	/* Save the floating point context, if any. */
-	FMRXNE  R1,  FPSCR
-	VPUSHNE {D0-D15}
+	//FMRXNE  R1,  FPSCR
+	//VPUSHNE {D0-D15}
 #if configFPU_D32 == 1
-	VPUSHNE	{D16-D31}
+	//VPUSHNE	{D16-D31}
 #endif /* configFPU_D32 */
-	PUSHNE	{R1}
+	//PUSHNE	{R1}
 
 	/* Save ulPortTaskHasFPUContext itself. */
 	PUSH	{R3}
@@ -129,12 +129,12 @@
 	CMP		R1, #0
 
 	/* Restore the floating point context, if any. */
-	POPNE 	{R0}
+	//POPNE 	{R0}
 #if configFPU_D32 == 1
-	VPOPNE	{D16-D31}
+	//VPOPNE	{D16-D31}
 #endif /* configFPU_D32 */
-	VPOPNE	{D0-D15}
-	VMSRNE  FPSCR, R0
+	//VPOPNE	{D0-D15}
+	//VMSRNE  FPSCR, R0
 
 	/* Restore the critical section nesting depth. */
 	LDR		R0, ulCriticalNestingConst

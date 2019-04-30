@@ -80,6 +80,8 @@ void rpi_aux_mu_init();
  */
 void rpi_aux_mu_putc(uint32_t c);
 
+void rpi_aux_mu_raw_putc(uint32_t c);
+
 /**
  * Send string
  * @param str
