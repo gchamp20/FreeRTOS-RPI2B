@@ -2,7 +2,9 @@
 
 #include "rpi_irq.h"
 
-static RPI_IRQ_TABLE_t g_rpi_irq_table[RPI_TOTAL_IRQ];
+volatile unsigned int* core0IntSrc = (volatile unsigned int*)0x40000060;
+
+static RPI_IRQ_TABLE_t g_rpi_irq_table[RPI_TOTAL_IRQ + 1];
 
 #define clz(a) \
  ({ unsigned long __value, __arg = (a); \
@@ -15,6 +17,9 @@ static RPI_IRQ_TABLE_t g_rpi_irq_table[RPI_TOTAL_IRQ];
  *
  **/
 void vApplicationIRQHandler() {
+#ifdef TRACING
+	no_tracing_interrupt_entry(1);
+#endif
     register uint32_t ulMaskedStatus;
     register uint32_t irqNumber;
     register uint32_t tmp;
@@ -46,6 +51,12 @@ void vApplicationIRQHandler() {
         }
     }
 
+	/* Check mailbox interrupt */
+	int src = *core0IntSrc;
+	if (src != 0 && src == 0x10) {
+		irqNumber = RPI_TOTAL_IRQ;
+	}
+
     //return;
 
     emit_interrupt:
@@ -59,6 +70,9 @@ void vApplicationIRQHandler() {
     if (g_rpi_irq_table[irqNumber].pHandler) {
         g_rpi_irq_table[irqNumber].pHandler(irqNumber, g_rpi_irq_table[irqNumber].pParam);
     }
+#ifdef TRACING
+	no_tracing_interrupt_exit(1);
+#endif
 }
 
 __attribute__((no_instrument_function))
@@ -86,7 +100,7 @@ void rpi_irq_init() {
 int rpi_irq_register_handler(uint32_t nIRQ, RPI_IRQ_HANDLER_t pHandler,
         void *pParam) {
 
-    if (nIRQ >= RPI_TOTAL_IRQ) {
+    if (nIRQ > RPI_TOTAL_IRQ) {
         return -1;
     }
 
